@@ -1,15 +1,16 @@
 class Game
   attr_accessor :guesses
+
   def initialize
     @guesses = 1
     @secret_word = secret_word
-    @check = Array.new(@secret_word.length,'_')
+    @check = Array.new(@secret_word.length, '_')
   end
 
   def play
     until gameover?
       print "#{@check}\n"
-      guess_check(player_guess)
+      guess_feedback(player_guess)
     end
   end
 
@@ -17,13 +18,11 @@ class Game
 
   def secret_word
     word = ''
-    until (6..12).include?(word.length) 
-      word = File.readlines('words.txt').sample.strip
-    end
-    p word
+    p word = File.readlines('words.txt').sample.strip until (6..12).include?(word.length)
+    word
   end
 
-  def guess_check(guess)
+  def guess_feedback(guess)
     array = []
     word = @secret_word
     word.length.times do |number|
@@ -32,7 +31,6 @@ class Game
     array.each do |index|
       @check[index] = guess
     end
-    print "#{@check}\n"
   end
 
   def gameover?
