@@ -1,8 +1,8 @@
-# 
+#
 require 'yaml'
 require './board'
 
-# Game
+# Game class for hangman has functionallity to save and load a game
 class Game
   include Board
   attr_accessor :guesses
@@ -18,7 +18,7 @@ class Game
     load?
     puts "Let's play hangman!"
     until gameover? || save?
-      display_tracker(@guess_tracker)
+      main_display(@guess_tracker)
       display_letters(@letters_guessed)
       @current_guess = player_input
       guess_feedback
@@ -52,40 +52,31 @@ class Game
       print 'Enter a valid character:'
       input = gets.chomp.downcase
     end
-    puts
+    display_bar
     @letters_guessed << input unless input == 'save'
     input
   end
 
   def gameover?
     if @guess_tracker == @secret_word.split('')
-      puts 'You win!'
-      print "#{@guess_tracker}\n"
-      true
+      display_gameover(@secret_word.split(''), 'win')
     elsif @guesses > 6
-      puts 'The word was:'
-      display_tracker(@secret_word.split(''))
-      puts 'Better luck next time!'
-      true
+      display_gameover(@secret_word.split(''), 'lose')
     end
   end
 
   def save?
     return unless @current_guess == 'save'
 
-    print 'Saving game'
-    3.times do
-      sleep 1
-      print '.'
-    end
     save_game
-    puts "\nSaved\n"
+    puts "Game saved!\n"
     true
   end
 
   def load?
     puts 'Would you like to load a game? (yes/no)'
     load = gets.chomp.downcase
+    puts
     return if load != 'yes'
 
     load_game
@@ -97,17 +88,18 @@ class Game
 
   def to_yaml
     YAML.dump({
-      :guesses => @guesses,
-      :secret_word => @secret_word,
-      :guess_tracker => @guess_tracker,
-      :letters_guessed => @letters_guessed
-    })
+                guesses: @guesses,
+                secret_word: @secret_word,
+                guess_tracker: @guess_tracker,
+                letters_guessed: @letters_guessed
+              })
   end
 
   def load_game
     begin
       data = YAML.load(File.open('save.yaml', 'r'))
-      @guesses = data[:guesses] 
+      File.delete('save.yaml')
+      @guesses = data[:guesses]
       @secret_word = data[:secret_word]
       @guess_tracker = data[:guess_tracker]
       @letters_guessed = data[:letters_guessed]
